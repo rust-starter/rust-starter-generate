@@ -18,24 +18,19 @@ bench:
 lint:
 	cargo clippy
 
+graph:
+    rm -f cargo-graph.dot
+    rm -f cargo-graph.png
+    cargo graph --optional-line-style dashed --optional-line-color red --optional-shape box --build-shape diamond --build-color green --build-line-color orange > cargo-graph.dot
+    dot -Tpng > cargo-graph.png cargo-graph.dot
+
 clean:
 	cargo clean
 	find . -type f -name "*.orig" -exec rm {} \;
 	find . -type f -name "*.bk" -exec rm {} \;
 	find . -type f -name ".*~" -exec rm {} \;	
 
-docker-build:
-	mv docker/.dockerignore .dockerignore
-	docker build -t {{package_name}}_{{package_version}} -f docker/Dockerfile .
-	mv .dockerignore docker/.dockerignore
-
-docker-version:
-	docker run -t {{package_name}}_{{package_version}} rustc --version
-	docker run -t {{package_name}}_{{package_version}} cargo --version
-	docker run -t {{package_name}}_{{package_version}} rustup --version
-
-docker-run:
-	docker run -t {{package_name}}_{{package_version}} cargo run 
-
-docker-test:	
-	docker run -t {{package_name}}_{{package_version}} cargo test --all
+docker:
+    mv docker/.dockerignore .dockerignore
+    docker build -t {{package_name}}_{{package_version}} -f docker/Dockerfile .
+    mv .dockerignore docker/.dockerignore

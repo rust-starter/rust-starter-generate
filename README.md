@@ -1,1 +1,1 @@
-Readme file
+cargo-generate template for rust-starter

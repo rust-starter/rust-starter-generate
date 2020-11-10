@@ -1,19 +1,21 @@
 use slog::Drain;
-use slog_async;
 use slog_syslog::Facility;
+use slog::o;
 
 use super::error::Result;
 
 pub fn setup_logging() -> Result<()> {
     // Setup Logging
     let _guard = slog_scope::set_global_logger(default_root_logger()?);
+    let _log_guard = slog_stdlog::init().unwrap();
+
     Ok(())
 }
 
 pub fn default_root_logger() -> Result<slog::Logger> {
     // Create drains
-    let syslog_drain = default_syslog_drain()?;
-    let term_drain = default_term_drain()?;
+    let syslog_drain = default_syslog_drain().unwrap_or(default_discard()?);
+    let term_drain = default_term_drain().unwrap_or(default_discard()?);
 
     // Merge drains
     let drain = slog::Duplicate(syslog_drain, term_drain).fuse();
@@ -23,6 +25,12 @@ pub fn default_root_logger() -> Result<slog::Logger> {
 
     // Return Logger
     Ok(logger)
+}
+
+fn default_discard() -> Result<slog_async::Async> {
+    let drain = slog_async::Async::default(slog::Discard);
+
+    Ok(drain)
 }
 
 // term drain: Log to Terminal
